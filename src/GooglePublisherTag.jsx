@@ -8,6 +8,7 @@ import Format from './constants/Format';
 import Dimensions from './constants/Dimensions';
 
 let nextId: number = 1;
+let scriptInitiated: bool = false;
 
 function getNextId(): string {
   nextId += 1;
@@ -42,7 +43,27 @@ function loadScript(): void {
   js.defer = true;
   js.src = 'https://www.googletagservices.com/tag/js/gpt.js';
 
-  document.body.appendChild(js);
+  // Delay the script append after a user interaction
+
+  document.addEventListener('scroll', initOnEvent);
+  document.addEventListener('mousemove', initOnEvent);
+  document.addEventListener('touchstart', initOnEvent);
+
+  function initOnEvent (event): void {
+    init();
+    event.currentTarget.removeEventListener(event.type, initOnEvent);
+  }
+
+  function init (): void {
+    if (scriptInitiated) {
+      // Don't load again
+      return false;
+    }
+
+    scriptInitiated = true;
+
+    document.body.appendChild(js);
+  }
 }
 
 function initGooglePublisherTag(options?: Object = {}, onInit?: Function): void {
